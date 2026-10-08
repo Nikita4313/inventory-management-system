@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block title %}Low Stock Report - Inventory System{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1><i class="fas fa-exclamation-triangle me-2 text-warning"></i>Low Stock Report</h1>
+        <p class="subtitle">Items that need restocking attention</p>
+    </div>
+    <div class="btn-group">
+        <a href="{{ url_for('products.dashboard') }}" class="btn btn-outline"><i
+                class="fas fa-arrow-left me-1"></i>Dashboard</a>
+    </div>
+</div>
+
+<!-- Summary -->
+<div class="stat-grid">
+    <div class="stat-card">
+        <div class="stat-icon red"><i class="fas fa-times-circle"></i></div>
+        <div class="stat-info">
+            <div class="stat-label">Out of Stock</div>
+            <div class="stat-value">{{ out_of_stock_count }}</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon amber"><i class="fas fa-exclamation-triangle"></i></div>
+        <div class="stat-info">
+            <div class="stat-label">Low Stock Items</div>
+            <div class="stat-value">{{ low_count }}</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon blue"><i class="fas fa-coins"></i></div>
+        <div class="stat-info">
+            <div class="stat-label">Restock Value Needed</div>
+            <div class="stat-value">Rs.{{ restock_value|intcomma }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3><i class="fas fa-list me-2"></i>Items Below Minimum Stock</h3>
+    </div>
+    <div class="table-container">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>SKU</th>
+                    <th>Category</th>
+                    <th class="text-center">Current</th>
+                    <th class="text-center">Minimum</th>
+                    <th class="text-center">Deficit</th>
+                    <th class="text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in products %}
+                <tr>
+                    <td>
+                        <a href="{{ url_for('products.product_detail', pk=product.id) }}" class="fw-bold">{{
+                            product.name }}</a>
+                    </td>
+                    <td><code class="font-mono">{{ product.sku }}</code></td>
+                    <td>{{ product.category.name if product.category else "-" }}</td>
+                    <td class="text-center">
+                        <span class="badge {% if product.quantity == 0 %}badge-danger{% else %}badge-warning{% endif %}">
+                            {{ product.quantity }}
+                        </span>
+                    </td>
+                    <td class="text-center">{{ product.minimum_stock }}</td>
+                    <td class="text-center fw-bold text-danger">
+                        -{{ product.minimum_stock - product.quantity }}
+                    </td>
+                    <td class="text-right">
+                        {% if user.can_edit %}
+                        <a href="{{ url_for('products.stock_adjust', pk=product.id) }}" class="btn btn-sm btn-success">
+                            <i class="fas fa-plus me-1"></i>Reorder
+                        </a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7">
+                        <div class="empty-state">
+                            <div class="empty-icon" style="color: var(--success);"><i class="fas fa-check-circle"></i>
+                            </div>
+                            <h3>All stock levels are healthy!</h3>
+                            <p>No products are currently below their minimum stock level.</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

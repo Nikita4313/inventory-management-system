@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+
+{% block title %}Admin Panel - Inventory System{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1><i class="fas fa-gauge-high me-2"></i>Admin Panel</h1>
+    <p class="subtitle">Manage accounts and monitor inventory activity</p>
+  </div>
+  <a href="{{ url_for('auth.user_list') }}" class="btn btn-primary">
+    <i class="fas fa-users-cog me-1"></i>Manage Users
+  </a>
+</div>
+
+<div class="stat-grid">
+  <div class="stat-card">
+    <div class="stat-icon blue"><i class="fas fa-users"></i></div>
+    <div class="stat-info">
+      <div class="stat-label">Total Accounts</div>
+      <div class="stat-value">{{ user_count|intcomma }}</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon green"><i class="fas fa-user-tie"></i></div>
+    <div class="stat-info">
+      <div class="stat-label">Staff Members</div>
+      <div class="stat-value">{{ staff_count|intcomma }}</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon amber"><i class="fas fa-eye"></i></div>
+    <div class="stat-info">
+      <div class="stat-label">Viewers</div>
+      <div class="stat-value">{{ viewer_count|intcomma }}</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon red"><i class="fas fa-boxes-stacked"></i></div>
+    <div class="stat-info">
+      <div class="stat-label">Products</div>
+      <div class="stat-value">{{ product_count|intcomma }}</div>
+    </div>
+  </div>
+</div>
+
+<div class="page-header">
+  <div>
+    <h2>Management</h2>
+    <p class="subtitle">Go directly to an administrative area</p>
+  </div>
+</div>
+<div class="stat-grid">
+  <a href="{{ url_for('auth.user_list') }}" class="card card-body">
+    <h3><i class="fas fa-users-cog me-2"></i>User Management</h3>
+    <p class="text-muted">Change account roles and permissions</p>
+  </a>
+  <a href="{{ url_for('products.product_list') }}" class="card card-body">
+    <h3><i class="fas fa-box me-2"></i>Products</h3>
+    <p class="text-muted">{{ product_count }} products in inventory</p>
+  </a>
+  <a href="{{ url_for('products.category_list') }}" class="card card-body">
+    <h3><i class="fas fa-tags me-2"></i>Categories</h3>
+    <p class="text-muted">{{ category_count }} categories</p>
+  </a>
+  <a href="{{ url_for('products.stock_movements') }}" class="card card-body">
+    <h3><i class="fas fa-exchange-alt me-2"></i>Stock Movements</h3>
+    <p class="text-muted">{{ movement_count|intcomma }} recorded movements</p>
+  </a>
+</div>
+
+<div class="card mt-4">
+  <div class="card-header">
+    <h3><i class="fas fa-user-clock me-2"></i>Recently Registered</h3>
+    <a href="{{ url_for('auth.user_list') }}" class="btn btn-sm btn-outline">All Users</a>
+  </div>
+  <div class="table-container">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Joined</th>
+          <th class="text-right">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for profile in recent_users %}
+        <tr>
+          <td>{{ profile.user.get_full_name()|default(profile.user.username, true) }}</td>
+          <td>{{ profile.user.email }}</td>
+          <td>{{ profile.get_role_display() }}</td>
+          <td>{{ profile.created_at|date('M d, Y') }}</td>
+          <td class="text-right">
+            <a href="{{ url_for('auth.edit_user', user_id=profile.user_id) }}" class="btn btn-sm btn-outline">Edit Role</a>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="5" class="text-center text-muted">No accounts found.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

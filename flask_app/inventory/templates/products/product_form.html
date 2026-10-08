@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - Inventory System{% endblock %}
+
+{% block content %}
+{% set selected_cat = request.form.get('category', product.category_id if product else '') %}
+{% set selected_status = request.form.get('status', product.status if product else 'active') %}
+
+<div class="page-header">
+    <div>
+        <h1><i class="fas fa-box me-2"></i>{{ title }}</h1>
+        <p class="subtitle">
+            {% if 'Edit' in title %}
+            Update product information
+            {% else %}
+            Add a new item to inventory
+            {% endif %}
+        </p>
+    </div>
+    <a href="{{ url_for('products.product_list') }}" class="btn btn-outline"><i class="fas fa-arrow-left me-1"></i>Back
+        to Products</a>
+</div>
+
+<div style="max-width: 720px;">
+    <div class="card">
+        <div class="card-body">
+            <form method="post" novalidate>
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                {% if errors %}
+                <div class="alert alert-danger">
+                    <i class="fas fa-times-circle"></i>
+                    Please correct the errors below.
+                </div>
+                {% endif %}
+
+                <!-- Basic Information -->
+                <h5 style="color: var(--gray-600); margin-bottom: 16px;"><i class="fas fa-info-circle me-2"></i>Basic
+                    Information</h5>
+
+                <div class="form-group">
+                    <label for="id_name">Product Name *</label>
+                    <input type="text" name="name" id="id_name"
+                        class="form-control {% if errors.get('name') %}is-invalid{% endif %}"
+                        value="{{ request.form.get('name', product.name if product else '') }}"
+                        placeholder="Enter product name" required>
+                    {% if errors.get('name') %}<div class="invalid-feedback">{{ errors.name }}</div>{% endif %}
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id_sku">SKU *</label>
+                        <input type="text" name="sku" id="id_sku"
+                            class="form-control {% if errors.get('sku') %}is-invalid{% endif %}"
+                            value="{{ request.form.get('sku', product.sku if product else '') }}"
+                            placeholder="e.g. ELEC-001" required>
+                        {% if errors.get('sku') %}<div class="invalid-feedback">{{ errors.sku }}</div>{% endif %}
+                        <p class="help-text">Unique identifier for this product</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_category">Category</label>
+                        <select name="category" id="id_category"
+                            class="form-select {% if errors.get('category') %}is-invalid{% endif %}">
+                            <option value="">---------</option>
+                            {% for cat in categories %}
+                            <option value="{{ cat.id }}" {% if selected_cat|string==cat.id|string %}selected{% endif %}>
+                                {{ cat.name }}</option>
+                            {% endfor %}
+                        </select>
+                        {% if errors.get('category') %}<div class="invalid-feedback">{{ errors.category }}</div>{%
+                        endif %}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="id_description">Description</label>
+                    <textarea name="description" id="id_description"
+                        class="form-control {% if errors.get('description') %}is-invalid{% endif %}" rows="3"
+                        placeholder="Product description (optional)">{{ request.form.get('description', (product.description or '') if product else '') }}</textarea>
+                </div>
+
+                <!-- Pricing & Stock -->
+                <h5 style="color: var(--gray-600); margin: 24px 0 16px;"><i class="fas fa-coins me-2"></i>Pricing &amp;
+                    Stock</h5>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id_price">Price (Rs.) *</label>
+                        <input type="number" name="price" id="id_price"
+                            class="form-control {% if errors.get('price') %}is-invalid{% endif %}"
+                            value="{{ request.form.get('price', product.price if product else '') }}" step="0.01"
+                            min="0.01" placeholder="0.00" required>
+                        {% if errors.get('price') %}<div class="invalid-feedback">{{ errors.price }}</div>{% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_quantity">Current Quantity *</label>
+                        <input type="number" name="quantity" id="id_quantity"
+                            class="form-control {% if errors.get('quantity') %}is-invalid{% endif %}"
+                            value="{{ request.form.get('quantity', product.quantity if product else 0) }}" min="0"
+                            placeholder="0" required>
+                        {% if errors.get('quantity') %}<div class="invalid-feedback">{{ errors.quantity }}</div>{%
+                        endif %}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_minimum_stock">Minimum Stock Level</label>
+                        <input type="number" name="minimum_stock" id="id_minimum_stock"
+                            class="form-control {% if errors.get('minimum_stock') %}is-invalid{% endif %}"
+                            value="{{ request.form.get('minimum_stock', product.minimum_stock if product else 10) }}"
+                            min="0" placeholder="10">
+                        {% if errors.get('minimum_stock') %}<div class="invalid-feedback">{{ errors.minimum_stock }}
+                        </div>{% endif %}
+                        <p class="help-text">Alert when stock falls below this</p>
+                    </div>
+                </div>
+
+                <!-- Status -->
+                <h5 style="color: var(--gray-600); margin: 24px 0 16px;"><i class="fas fa-toggle-on me-2"></i>Status
+                </h5>
+
+                <div class="form-group">
+                    <label for="id_status">Product Status</label>
+                    <select name="status" id="id_status" class="form-select">
+                        <option value="active" {% if selected_status=='active' %}selected{% endif %}>Active</option>
+                        <option value="inactive" {% if selected_status=='inactive' %}selected{% endif %}>Inactive
+                        </option>
+                        <option value="discontinued" {% if selected_status=='discontinued' %}selected{% endif %}>
+                            Discontinued</option>
+                    </select>
+                </div>
+
+                <!-- Actions -->
+                <div class="d-flex justify-between mt-4">
+                    <a href="{{ url_for('products.product_list') }}" class="btn btn-outline">Cancel</a>
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-save me-1"></i>
+                        {% if 'Edit' in title %}
+                        Save Changes
+                        {% else %}
+                        Create Product
+                        {% endif %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ product.name }} - Inventory System{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1><i class="fas fa-box me-2"></i>{{ product.name }}</h1>
+        <p class="subtitle">SKU: <code class="font-mono">{{ product.sku }}</code></p>
+    </div>
+    <div class="btn-group">
+        {% if can_edit %}
+        <a href="{{ url_for('products.product_edit', pk=product.id) }}" class="btn btn-primary"><i
+                class="fas fa-edit me-1"></i>Edit</a>
+        <a href="{{ url_for('products.stock_adjust', pk=product.id) }}" class="btn btn-success"><i
+                class="fas fa-plus-minus me-1"></i>Adjust Stock</a>
+        {% endif %}
+        {% if user.is_admin %}
+        <a href="{{ url_for('products.product_delete', pk=product.id) }}" class="btn btn-danger"><i
+                class="fas fa-trash me-1"></i>Delete</a>
+        {% endif %}
+        <a href="{{ url_for('products.product_list') }}" class="btn btn-outline"><i
+                class="fas fa-arrow-left me-1"></i>Back</a>
+    </div>
+</div>
+
+<div class="product-detail-grid">
+    <!-- Main Info -->
+    <div>
+        <div class="card">
+            <div class="card-header">
+                <h3><i class="fas fa-info-circle me-2"></i>Product Details</h3>
+                <span
+                    class="badge {% if product.status == 'active' %}badge-success{% elif product.status == 'inactive' %}badge-secondary{% else %}badge-danger{% endif %}">
+                    {{ product.status_label }}
+                </span>
+            </div>
+            <div class="card-body">
+                <div class="detail-section">
+                    <div class="detail-row">
+                        <span class="label">Name</span>
+                        <span class="value">{{ product.name }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="label">SKU</span>
+                        <span class="value font-mono">{{ product.sku }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="label">Category</span>
+                        <span class="value">{{ product.category.name if product.category else "Uncategorized" }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="label">Description</span>
+                        <span class="value">{{ product.description or "No description" }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="label">Created By</span>
+                        <span class="value">{{ product.created_by.display_name if product.created_by else "Unknown"
+                            }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="label">Created At</span>
+                        <span class="value">{{ product.created_at.strftime('%b %d, %Y %H:%M') }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stock Movements -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h3><i class="fas fa-history me-2"></i>Stock History</h3>
+                <a href="{{ url_for('products.stock_movements', product=product.sku) }}"
+                    class="btn btn-sm btn-outline">View All</a>
+            </div>
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th>Quantity</th>
+                            <th>Notes</th>
+                            <th>By</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for movement in movements %}
+                        <tr>
+                            <td>
+                                <span
+                                    class="badge {% if movement.movement_type == 'in' %}badge-success{% elif movement.movement_type == 'out' %}badge-danger{% else %}badge-info{% endif %}">
+                                    {{ movement.movement_type_label }}
+                                </span>
+                            </td>
+                            <td class="fw-bold">{{ movement.quantity }}</td>
+                            <td>{{ movement.notes or movement.reference or "-" }}</td>
+                            <td>{{ movement.performed_by_name }}</td>
+                            <td>{{ movement.created_at|timesince }} ago</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted" style="padding: 32px;">No stock movements
+                                recorded</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div>
+        <!-- Stock Info -->
+        <div class="card">
+            <div class="card-header">
+                <h3><i class="fas fa-warehouse me-2"></i>Stock Status</h3>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-3">
+                    <div class="stat-value"
+                        style="font-size: 2.5rem; color: {% if product.stock_status == 'out_of_stock' %}var(--danger){% elif product.stock_status == 'low_stock' %}var(--warning){% else %}var(--success){% endif %}">
+                        {{ product.quantity }}
+                    </div>
+                    <div class="text-muted">units in stock</div>
+                    <span
+                        class="badge {% if product.stock_status == 'out_of_stock' %}badge-danger{% elif product.stock_status == 'low_stock' %}badge-warning{% else %}badge-success{% endif %} mt-2">
+                        {% if product.stock_status == 'out_of_stock' %}Out of Stock{% elif product.stock_status ==
+                        'low_stock' %}Low Stock{% else %}In Stock{% endif %}
+                    </span>
+                </div>
+
+                <div class="detail-row">
+                    <span class="label">Minimum Stock</span>
+                    <span class="value">{{ product.minimum_stock }}</span>
+                </div>
+
+                {% if product.is_low_stock %}
+                <div class="alert alert-warning mt-2" style="margin-bottom: 0;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Stock is below minimum level!
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Pricing -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h3><i class="fas fa-dollar-sign me-2"></i>Pricing</h3>
+            </div>
+            <div class="card-body">
+                <div class="detail-row">
+                    <span class="label">Unit Price</span>
+                    <span class="value text-success fw-bold">Rs.{{ product.price|intcomma }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="label">Stock Value</span>
+                    <span class="value fw-bold">Rs.{{ product.stock_value|intcomma }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

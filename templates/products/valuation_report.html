@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+
+{% block title %}Inventory Valuation - Inventory System{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1><i class="fas fa-coins me-2"></i>Inventory Valuation Report</h1>
+        <p class="subtitle">Stock value breakdown by category</p>
+    </div>
+    <div class="btn-group">
+        <a href="{{ url_for('products.dashboard') }}" class="btn btn-outline"><i class="fas fa-arrow-left me-1"></i>Dashboard</a>
+    </div>
+</div>
+
+<!-- Total Value -->
+<div class="stat-grid">
+    <div class="stat-card">
+        <div class="stat-icon green"><i class="fas fa-coins"></i></div>
+        <div class="stat-info">
+            <div class="stat-label">Total Inventory Value</div>
+            <div class="stat-value">Rs.{{ total_value|intcomma }}</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon blue"><i class="fas fa-tags"></i></div>
+        <div class="stat-info">
+            <div class="stat-label">Total Categories</div>
+            <div class="stat-value">{{ categories|length }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3><i class="fas fa-chart-pie me-2"></i>Value by Category</h3>
+    </div>
+    <div class="table-container">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Category</th>
+                    <th class="text-center">Products</th>
+                    <th class="text-center">Total Units</th>
+                    <th class="text-right">Total Value</th>
+                    <th class="text-right">% of Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cat in categories %}
+                <tr>
+                    <td class="fw-bold">{{ cat.name }}</td>
+                    <td class="text-center">{{ cat.num_products|default('0', true) }}</td>
+                    <td class="text-center">{{ cat.total_quantity|default('0', true) }}</td>
+                    <td class="text-right fw-bold">Rs.{{ cat.total_value|default('0', true)|intcomma }}</td>
+                    <td class="text-right">
+                        {% if total_value %}
+                        {{ ((cat.total_value / total_value) * 100)|round|int }}%
+                        {% else %}0%{% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5">
+                        <div class="empty-state">
+                            <div class="empty-icon"><i class="fas fa-chart-pie"></i></div>
+                            <h3>No data available</h3>
+                            <p>Add products to categories to see valuation data.</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            {% if categories %}
+            <tfoot>
+                <tr style="background: var(--gray-50); font-weight: 700;">
+                    <td>Total</td>
+                    <td class="text-center">{{ categories|length }}</td>
+                    <td class="text-center">-</td>
+                    <td class="text-right">Rs.{{ total_value|intcomma }}</td>
+                    <td class="text-right">100%</td>
+                </tr>
+            </tfoot>
+            {% endif %}
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+
+
+{% block title %}Products - Inventory System{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1><i class="fas fa-box me-2"></i>Products</h1>
+        <p class="subtitle">Manage your inventory items</p>
+    </div>
+    <div class="btn-group">
+        {% if user.profile.can_edit %}
+        <a href="{{ url_for('products.product_create') }}" class="btn btn-primary"><i class="fas fa-plus me-1"></i>Add Product</a>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Filter Bar -->
+<div class="filter-bar">
+    <form method="get">
+        <div class="form-group" style="flex: 2;">
+            <input type="text" name="q" class="form-control" placeholder="Search by name, SKU, or description..." value="{{ query }}">
+        </div>
+        <div class="form-group">
+            <select name="category" class="form-select">
+                <option value="">All Categories</option>
+                {% for cat in categories %}
+                <option value="{{ cat.id }}" {% if selected_category == cat.id|string %}selected{% endif %}>{{ cat.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <select name="stock" class="form-select">
+                <option value="">All Stock Levels</option>
+                <option value="in_stock" {% if selected_stock == 'in_stock' %}selected{% endif %}>In Stock</option>
+                <option value="low" {% if selected_stock == 'low' %}selected{% endif %}>Low Stock</option>
+                <option value="out" {% if selected_stock == 'out' %}selected{% endif %}>Out of Stock</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <select name="status" class="form-select">
+                <option value="">All Status</option>
+                <option value="active" {% if selected_status == 'active' %}selected{% endif %}>Active</option>
+                <option value="inactive" {% if selected_status == 'inactive' %}selected{% endif %}>Inactive</option>
+                <option value="discontinued" {% if selected_status == 'discontinued' %}selected{% endif %}>Discontinued</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-filter me-1"></i>Filter</button>
+        <a href="{{ url_for('products.product_list') }}" class="btn btn-outline btn-sm">Clear</a>
+    </form>
+</div>
+
+<!-- Products Table -->
+<div class="card">
+    <div class="table-container">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>SKU</th>
+                    <th>Category</th>
+                    <th class="text-right">Price</th>
+                    <th class="text-center">Quantity</th>
+                    <th class="text-center">Status</th>
+                    <th class="text-right">Value</th>
+                    <th class="text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in products %}
+                <tr>
+                    <td>
+                        <a href="{{ url_for('products.product_detail', product_id=product.id) }}" class="fw-bold" style="color: var(--gray-800);">{{ product.name }}</a>
+                        {% if product.description %}
+                        <small class="text-muted d-block">{{ product.description|truncatewords(10) }}</small>
+                        {% endif %}
+                    </td>
+                    <td><code class="font-mono">{{ product.sku }}</code></td>
+                    <td>{{ product.category.name|default('-', true) }}</td>
+                    <td class="text-right">Rs.{{ product.price|intcomma }}</td>
+                    <td class="text-center">
+                        <span class="badge {% if product.stock_status == 'out_of_stock' %}badge-danger{% elif product.stock_status == 'low_stock' %}badge-warning{% else %}badge-success{% endif %}">
+                            {{ product.quantity }}
+                        </span>
+                    </td>
+                    <td class="text-center">
+                        <span class="badge {% if product.status == 'active' %}badge-success{% elif product.status == 'inactive' %}badge-secondary{% else %}badge-danger{% endif %}">
+                            {{ product.get_status_display() }}
+                        </span>
+                    </td>
+                    <td class="text-right">Rs.{{ product.stock_value|intcomma }}</td>
+                    <td class="text-right">
+                        <div class="btn-group" style="justify-content: flex-end;">
+                            <a href="{{ url_for('products.product_detail', product_id=product.id) }}" class="btn btn-sm btn-outline" title="View"><i class="fas fa-eye"></i></a>
+                            {% if user.profile.can_edit %}
+                            <a href="{{ url_for('products.product_edit', product_id=product.id) }}" class="btn btn-sm btn-outline" title="Edit"><i class="fas fa-edit"></i></a>
+                            <a href="{{ url_for('products.stock_adjust', product_id=product.id) }}" class="btn btn-sm btn-success" title="Adjust Stock"><i class="fas fa-plus-minus"></i></a>
+                            {% endif %}
+                            {% if user.profile.is_admin %}
+                            <a href="{{ url_for('products.product_delete', product_id=product.id) }}" class="btn btn-sm btn-outline" title="Delete" style="color: var(--danger);"><i class="fas fa-trash"></i></a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="8">
+                        <div class="empty-state">
+                            <div class="empty-icon"><i class="fas fa-box-open"></i></div>
+                            <h3>No products found</h3>
+                            <p>{% if query or selected_category or selected_stock %}Try adjusting your filters{% else %}Start by adding your first product{% endif %}</p>
+                            {% if user.profile.can_edit %}
+                            <a href="{{ url_for('products.product_create') }}" class="btn btn-primary"><i class="fas fa-plus me-1"></i>Add Product</a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Summary Footer -->
+{% if products %}
+<div class="card mt-3">
+    <div class="card-body d-flex justify-between align-center">
+        <span class="text-muted">Showing {{ products|length }} product{% if products|length != 1 %}s{% endif %}</span>
+        <span class="fw-bold">Total Value: Rs.{{ total_stock_value|default('0', true)|intcomma }}</span>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

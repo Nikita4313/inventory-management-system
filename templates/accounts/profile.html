@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block title %}My Profile - Inventory System{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1><i class="fas fa-user-circle me-2"></i>My Profile</h1>
+        <p class="subtitle">Manage your account settings</p>
+    </div>
+</div>
+
+<div style="max-width: 640px;">
+    <div class="card">
+        <div class="card-header">
+            <h3><i class="fas fa-id-card me-2"></i>Account Information</h3>
+        </div>
+        <div class="card-body">
+            <div class="detail-row">
+                <span class="label">Username</span>
+                <span class="value">{{ user.username }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Role</span>
+                <span class="value">
+                    <span class="badge {% if user_profile.is_admin %}badge-danger{% elif user_profile.is_staff_member %}badge-primary{% else %}badge-secondary{% endif %}">
+                        {{ user_profile.get_role_display() }}
+                    </span>
+                </span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Member Since</span>
+                <span class="value">{{ user.date_joined|date('M d, Y') }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mt-3">
+        <div class="card-header">
+            <h3><i class="fas fa-edit me-2"></i>Edit Profile</h3>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {{ form.csrf_token }}
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id_first_name">First Name</label>
+                        <input type="text" name="first_name" id="id_first_name" class="form-control" value="{{ user.first_name }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="id_last_name">Last Name</label>
+                        <input type="text" name="last_name" id="id_last_name" class="form-control" value="{{ user.last_name }}">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="id_email">Email</label>
+                    <input type="email" name="email" id="id_email" class="form-control" value="{{ user.email }}">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id_phone">Phone</label>
+                        <input type="text" name="phone" id="id_phone" class="form-control" value="{{ user_profile.phone|default('', true) }}" placeholder="Phone number">
+                    </div>
+                    <div class="form-group">
+                        <label for="id_department">Department</label>
+                        <input type="text" name="department" id="id_department" class="form-control" value="{{ user_profile.department|default('', true) }}" placeholder="Department">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save me-1"></i>Save Changes
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

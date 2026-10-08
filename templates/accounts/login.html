@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block title %}Login - Inventory System{% endblock %}
+
+{% block auth_content %}
+<div class="auth-layout">
+    <div class="auth-card">
+        <div class="auth-header">
+            <div class="logo"><i class="fas fa-boxes-stacked"></i></div>
+            <h1>Welcome Back</h1>
+            <p>Sign in to your inventory account</p>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">
+                <i class="fas {% if category == 'success' %}fa-check-circle{% elif category == 'error' %}fa-times-circle{% else %}fa-info-circle{% endif %}"></i>
+                {{ message }}
+            </div>
+            {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% if form.errors %}
+        <div class="alert alert-danger">
+            <i class="fas fa-times-circle"></i>
+            Invalid username or password. Please try again.
+        </div>
+        {% endif %}
+
+        <form method="post" novalidate>
+            {{ form.csrf_token }}
+            <div class="form-group">
+                {{ form.username.label }}
+                {% if form.username.errors %}
+                    {{ form.username(class="form-control is-invalid") }}
+                    <div class="invalid-feedback">
+                        {% for error in form.username.errors %}{{ error }}{% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.username(class="form-control", placeholder="Enter your username", autofocus=true) }}
+                {% endif %}
+            </div>
+            <div class="form-group">
+                {{ form.password.label }}
+                {% if form.password.errors %}
+                    {{ form.password(class="form-control is-invalid") }}
+                    <div class="invalid-feedback">
+                        {% for error in form.password.errors %}{{ error }}{% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.password(class="form-control", placeholder="Enter your password") }}
+                {% endif %}
+            </div>
+            <div class="form-group" style="margin-bottom: 16px;">
+                {{ form.remember() }} {{ form.remember.label }}
+            </div>
+            {{ form.submit(class="btn btn-primary btn-lg", style="width: 100%; margin-top: 8px;") }}
+        </form>
+
+        <div class="auth-footer">
+            Don't have an account? <a href="{{ url_for('auth.register') }}">Sign Up</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

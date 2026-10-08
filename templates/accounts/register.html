@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% block title %}Register - Inventory System{% endblock %}
+
+{% block auth_content %}
+<div class="auth-layout">
+    <div class="auth-card">
+        <div class="auth-header">
+            <div class="logo"><i class="fas fa-user-plus"></i></div>
+            <h1>Create Account</h1>
+            <p>Join the inventory management system</p>
+        </div>
+
+        {% if form.errors %}
+        <div class="alert alert-danger">
+            <i class="fas fa-times-circle"></i>
+            Please correct the errors below.
+            {% for field, errors in form.errors.items() %}
+                {% if field != 'csrf_token' %}
+                    {% for error in errors %}
+                    <div>{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <form method="post" novalidate>
+            {{ form.csrf_token }}
+            <div class="form-row">
+                <div class="form-group">
+                    {{ form.first_name.label }}
+                    {% if form.first_name.errors %}
+                        {{ form.first_name(class="form-control is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.first_name.errors %}{{ error }}{% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.first_name(class="form-control", placeholder="First name") }}
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    {{ form.last_name.label }}
+                    {% if form.last_name.errors %}
+                        {{ form.last_name(class="form-control is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.last_name.errors %}{{ error }}{% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.last_name(class="form-control", placeholder="Last name") }}
+                    {% endif %}
+                </div>
+            </div>
+            <div class="form-group">
+                {{ form.username.label }}
+                {% if form.username.errors %}
+                    {{ form.username(class="form-control is-invalid") }}
+                    <div class="invalid-feedback">
+                        {% for error in form.username.errors %}{{ error }}{% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.username(class="form-control", placeholder="Choose a username") }}
+                {% endif %}
+            </div>
+            <div class="form-group">
+                {{ form.email.label }}
+                {% if form.email.errors %}
+                    {{ form.email(class="form-control is-invalid") }}
+                    <div class="invalid-feedback">
+                        {% for error in form.email.errors %}{{ error }}{% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.email(class="form-control", placeholder="your@email.com") }}
+                {% endif %}
+            </div>
+            <div class="form-group">
+                {{ form.password.label }}
+                {% if form.password.errors %}
+                    {{ form.password(class="form-control is-invalid") }}
+                    <div class="invalid-feedback">
+                        {% for error in form.password.errors %}{{ error }}{% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.password(class="form-control", placeholder="Create a password") }}
+                {% endif %}
+            </div>
+            <div class="form-group">
+                {{ form.password_confirm.label }}
+                {% if form.password_confirm.errors %}
+                    {{ form.password_confirm(class="form-control is-invalid") }}
+                    <div class="invalid-feedback">
+                        {% for error in form.password_confirm.errors %}{{ error }}{% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.password_confirm(class="form-control", placeholder="Confirm your password") }}
+                {% endif %}
+            </div>
+            {{ form.submit(class="btn btn-primary btn-lg", style="width: 100%; margin-top: 8px;") }}
+        </form>
+
+        <div class="auth-footer">
+            Already have an account? <a href="{{ url_for('auth.login') }}">Sign In</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

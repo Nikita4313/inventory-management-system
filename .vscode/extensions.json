@@ -1,0 +1,17 @@
+{
+    "recommendations": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-python.debugpy",
+        "batisteo.vscode-django",
+        "wholroyd.jinja",
+        "charliermarsh.ruff",
+        "ms-python.black-formatter",
+        "eamodio.gitlens",
+        "mhutchie.git-graph",
+        "humao.rest-client",
+        "redhat.vscode-yaml",
+        "yzhang.markdown-all-in-one",
+        "ms-vscode.vscode-typescript-next"
+    ]
+}

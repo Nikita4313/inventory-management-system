@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+
+{% block title %}Delete Category - Inventory System{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1><i class="fas fa-trash me-2 text-danger"></i>Delete Category</h1>
+        <p class="subtitle">This action cannot be undone</p>
+    </div>
+</div>
+
+<div class="card" style="max-width: 600px;">
+    <div class="card-body">
+        <div class="alert alert-danger">
+            <i class="fas fa-exclamation-triangle"></i>
+            <div>
+                <strong>Warning:</strong> You are about to delete the category <strong>"{{ category.name }}"</strong>.
+                This will permanently remove all associated data.
+            </div>
+        </div>
+
+        <div class="detail-section">
+            <h4><i class="fas fa-info-circle me-2"></i>Category Details</h4>
+            <div class="detail-row">
+                <span class="label">Name</span>
+                <span class="value">{{ category.name }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Description</span>
+                <span class="value">{{ category.description|default('No description', true) }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Products</span>
+                <span class="value">{{ num_products }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Total Value</span>
+                <span class="value">Rs.{{ category_total_value|intcomma }}</span>
+            </div>
+        </div>
+
+        <form method="post">
+            {{ form.csrf_token }}
+            <div class="d-flex gap-2 mt-3">
+                <button type="submit" class="btn btn-danger">
+                    <i class="fas fa-trash me-1"></i>Delete Category
+                </button>
+                <a href="{{ url_for('products.category_list') }}" class="btn btn-outline">
+                    <i class="fas fa-times me-1"></i>Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

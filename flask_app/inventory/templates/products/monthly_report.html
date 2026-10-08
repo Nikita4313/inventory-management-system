@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+
+{% block title %}Monthly Report - Inventory System{% endblock %}
+
+{% block content %}
+{% set month_options = [3, 6, 12, 24, 36, 60] %}
+
+<div class="page-header">
+    <div>
+        <h1><i class="fas fa-chart-bar me-2"></i>Monthly Stock Movement Report</h1>
+        <p class="subtitle">Track stock inflow and outflow trends over the last {{ months }} months</p>
+    </div>
+    <div class="btn-group">
+        <form method="get">
+            <select name="months" class="form-select" onchange="this.form.submit()">
+                {# keep the current window selectable even if it is not a preset #}
+                {% if months not in month_options %}
+                <option value="{{ months }}" selected>Last {{ months }} months</option>
+                {% endif %}
+                {% for option in month_options %}
+                <option value="{{ option }}" {% if months==option %}selected{% endif %}>Last {{ option }} months
+                </option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="btn btn-outline btn-sm"><i class="fas fa-sync me-1"></i>Apply</button>
+        </form>
+        <a href="{{ url_for('products.dashboard') }}" class="btn btn-outline"><i
+                class="fas fa-arrow-left me-1"></i>Dashboard</a>
+    </div>
+</div>
+
+<!-- Summary Charts -->
+<div class="chart-grid mb-4">
+    <div class="card mini-chart">
+        <div class="chart-value text-success">+{{ total_in }}</div>
+        <div class="chart-label">Total Stock In (units)</div>
+    </div>
+    <div class="card mini-chart">
+        <div class="chart-value text-danger">-{{ total_out }}</div>
+        <div class="chart-label">Total Stock Out (units)</div>
+    </div>
+    <div class="card mini-chart">
+        <div class="chart-value">{{ total_transactions }}</div>
+        <div class="chart-label">Total Transactions</div>
+    </div>
+</div>
+
+<!-- Monthly Breakdown Table -->
+<div class="card">
+    <div class="card-header">
+        <h3><i class="fas fa-calendar-alt me-2"></i>Monthly Breakdown</h3>
+    </div>
+    <div class="table-container">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Month</th>
+                    <th class="text-center">Stock In</th>
+                    <th class="text-center">Stock Out</th>
+                    <th class="text-center">Adjustments</th>
+                    <th class="text-center">Transactions</th>
+                    <th class="text-center">Net In &minus; Out</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for month in monthly_data %}
+                <tr>
+                    <td class="fw-bold">{{ month.month.strftime('%B %Y') }}</td>
+                    <td class="text-center">
+                        <span class="badge badge-success">+{{ month.in_quantity }}</span>
+                    </td>
+                    <td class="text-center">
+                        <span class="badge badge-danger">-{{ month.out_quantity }}</span>
+                    </td>
+                    <td class="text-center">
+                        <span class="badge badge-info">{{ month.adjustment_quantity }}</span>
+                    </td>
+                    <td class="text-center">{{ month.in_count + month.out_count }}</td>
+                    <td
+                        class="text-center fw-bold {% if month.net_change >= 0 %}text-success{% else %}text-danger{% endif %}">
+                        {{ month.net_change }}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6">
+                        <div class="empty-state">
+                            <div class="empty-icon"><i class="fas fa-chart-bar"></i></div>
+                            <h3>No data available</h3>
+                            <p>Monthly movement data will appear once stock adjustments are recorded.</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="card-footer text-muted">
+        Adjustments are recorded as a positive magnitude, so they are listed separately and are not
+        included in the net in/out figure.
+    </div>
+</div>
+{% endblock %}

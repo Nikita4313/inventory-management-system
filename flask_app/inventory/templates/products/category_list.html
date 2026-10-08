@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}Categories - Inventory System{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1><i class="fas fa-tags me-2"></i>Categories</h1>
+        <p class="subtitle">Organize your products into categories</p>
+    </div>
+    <div class="btn-group">
+        {% if user.can_edit %}
+        <a href="{{ url_for('products.category_create') }}" class="btn btn-primary"><i class="fas fa-plus me-1"></i>Add
+            Category</a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card">
+    <div class="table-container">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Category</th>
+                    <th>Description</th>
+                    <th class="text-center">Products</th>
+                    <th class="text-right">Total Value</th>
+                    <th class="text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for category in categories %}
+                <tr>
+                    <td class="fw-bold">{{ category.name }}</td>
+                    <td>{{ category.description|truncatewords(10) if category.description else "-" }}</td>
+                    <td class="text-center">
+                        <span
+                            class="badge {% if category.num_products > 0 %}badge-primary{% else %}badge-secondary{% endif %}">
+                            {{ category.num_products }}
+                        </span>
+                    </td>
+                    <td class="text-right">Rs.{{ category.total_value|intcomma }}</td>
+                    <td class="text-right">
+                        <div class="btn-group" style="justify-content: flex-end;">
+                            {% if user.can_edit %}
+                            <a href="{{ url_for('products.category_edit', pk=category.id) }}"
+                                class="btn btn-sm btn-outline" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            {% endif %}
+                            {% if user.is_admin %}
+                            <a href="{{ url_for('products.category_delete', pk=category.id) }}"
+                                class="btn btn-sm btn-outline" title="Delete" style="color: var(--danger);">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5">
+                        <div class="empty-state">
+                            <div class="empty-icon"><i class="fas fa-tags"></i></div>
+                            <h3>No categories yet</h3>
+                            <p>Create your first category to organize products.</p>
+                            {% if user.can_edit %}
+                            <a href="{{ url_for('products.category_create') }}" class="btn btn-primary"><i
+                                    class="fas fa-plus me-1"></i>Create Category</a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
